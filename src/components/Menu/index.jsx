@@ -25,6 +25,7 @@ const Menu = () => {
     dispatch(menuItemClick(itemName));
   };
   const handleActionItemClick = (itemName) => {
+    console.log("action item: ", itemName);
     dispatch(actionItemClick(itemName));
   };
 

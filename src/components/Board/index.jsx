@@ -13,41 +13,45 @@ const Board = () => {
   const drawHistory = useRef([]);
   const historyPointer = useRef(0);
   const shouldDraw = useRef(false);
-  // const { activeMenuItem, actionMenuItem } = useSelector((state) => state.menu);
-  const actionMenuItem = useSelector((state) => state.menu.actionMenuItem);
+  const { activeMenuItem, actionMenuItem } = useSelector((state) => state.menu);
+  // const actionMenuItem = useSelector((state) => state.menu.actionMenuItem);
 
-  const activeMenuItem = useSelector((state) => state.menu.activeMenuItem);
+  // const activeMenuItem = useSelector((state) => state.menu.activeMenuItem);
   const { color, size } = useSelector((state) => state.toolbox[activeMenuItem]);
 
   console.log("color, size: ", color, size);
   // UNDO , REDO, DOWNLOAD
-  // useEffect(() => {
-  //   if (!canvasRef.current) return;
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas.getContext("2d");
-  //   if (actionMenuItem === MENU_ITEMS.DOWNLOAD) {
-  //     const URL = canvas.toDataURL();
-  //     const anchor = document.createElement("a");
-  //     anchor.href = URL;
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
 
-  //     anchor.download = "sketch.jpg";
-  //     anchor.click();
-  //   } else if (
-  //     actionMenuItem === MENU_ITEMS.UNDO ||
-  //     actionMenuItem === MENU_ITEMS.REDO
-  //   ) {
-  //     if (historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO)
-  //       historyPointer.current -= 1;
-  //     if (
-  //       historyPointer.current < drawHistory.current.length - 1 &&
-  //       actionMenuItem === MENU_ITEMS.REDO
-  //     )
-  //       historyPointer.current += 1;
-  //     const imageData = drawHistory.current[historyPointer.current];
-  //     ctx.putImageData(imageData, 0, 0);
-  //   }
-  //   dispatch(actionItemClick(null));
-  // }, [actionMenuItem, dispatch]);
+    console.log("actionMenuItem: ", actionMenuItem);
+    if (actionMenuItem === MENU_ITEMS.DOWNLOAD) {
+      const URL = canvas.toDataURL();
+      console.log(URL);
+      const anchor = document.createElement("a");
+      anchor.href = URL;
+
+      anchor.download = "sketch.jpg";
+      anchor.click();
+    } else if (
+      actionMenuItem === MENU_ITEMS.UNDO ||
+      actionMenuItem === MENU_ITEMS.REDO
+    ) {
+      if (historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO)
+        historyPointer.current -= 1;
+      if (
+        historyPointer.current < drawHistory.current.length - 1 &&
+        actionMenuItem === MENU_ITEMS.REDO
+      )
+        historyPointer.current += 1;
+      const imageData = drawHistory.current[historyPointer.current];
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    dispatch(actionItemClick(null));
+  }, [actionMenuItem, dispatch]);
 
   // BRUSH SIZE AND COLOR
   useEffect(() => {
@@ -119,9 +123,9 @@ const Board = () => {
 
     const handleMouseUp = (e) => {
       shouldDraw.current = false;
-      // const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      // drawHistory.current.push(imageData);
-      // historyPointer.current = drawHistory.current.length - 1;
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      drawHistory.current.push(imageData);
+      historyPointer.current = drawHistory.current.length - 1;
     };
 
     // const handleBeginPath = (path) => {
