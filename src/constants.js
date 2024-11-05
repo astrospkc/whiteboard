@@ -1,3 +1,4 @@
+"use client";
 const COLORS = {
   BLACK: "black",
   RED: "red",
@@ -6,6 +7,8 @@ const COLORS = {
   ORANGE: "orange",
   YELLOW: "yellow",
   WHITE: "white",
+  VIOLET: "violet",
+  INDIGO: "indigo",
 };
 
 const MENU_ITEMS = {

@@ -1,4 +1,5 @@
-import Image from "next/image";
+// "use client";
+
 import Menu from "../components/Menu/index.jsx";
 import ToolBox from "../components/ToolBox/index.jsx";
 import Board from "../components/Board/index.jsx";

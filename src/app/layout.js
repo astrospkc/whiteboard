@@ -1,6 +1,5 @@
 import "./globals.css";
-import { store } from "../store";
-import { Provider } from "react-redux";
+import StoreProvider from "./StoreProvider";
 
 export const metadata = {
   title: "Create Next App",
@@ -13,7 +12,7 @@ export default function RootLayout({ children }) {
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Provider store={store}>{children}</Provider>
+        <StoreProvider>{children}</StoreProvider>
       </body>
     </html>
   );
