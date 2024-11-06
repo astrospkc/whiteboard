@@ -32,20 +32,21 @@ const Board = () => {
       console.log(URL);
       const anchor = document.createElement("a");
       anchor.href = URL;
-
       anchor.download = "sketch.jpg";
       anchor.click();
     } else if (
       actionMenuItem === MENU_ITEMS.UNDO ||
       actionMenuItem === MENU_ITEMS.REDO
     ) {
-      if (historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO)
+      if (historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO) {
         historyPointer.current -= 1;
+      }
       if (
         historyPointer.current < drawHistory.current.length - 1 &&
         actionMenuItem === MENU_ITEMS.REDO
-      )
+      ) {
         historyPointer.current += 1;
+      }
       const imageData = drawHistory.current[historyPointer.current];
       ctx.putImageData(imageData, 0, 0);
     }
@@ -63,62 +64,76 @@ const Board = () => {
       ctx.strokeStyle = color;
       ctx.lineWidth = size;
     };
+
+    const handleChangeConfig = (config) => {
+      console.log("config", config);
+      changeConfig(config.color, config.size);
+    };
+
     changeConfig(color, size);
+    socket.on("changeConfig", handleChangeConfig);
 
-    // const handleChangeConfig = (config) => {
-    //   console.log("config", config);
-    //   changeConfig(config.color, config.size);
-    // };
-    // changeConfig(color, size);
-    // socket.on("changeConfig", handleChangeConfig);
-
-    // return () => {
-    //   socket.off("changeConfig", handleChangeConfig);
-    // };
+    return () => {
+      socket.off("changeConfig", handleChangeConfig);
+    };
   }, [color, size]);
 
   // useLayoutEffect works before the useEffect runs, before the paint happens this hooks run
 
   useLayoutEffect(() => {
+    // console.log("canvas ref: ", canvasRef.current);
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
+
+    // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
     const beginPath = (x, y) => {
       ctx.beginPath();
       ctx.moveTo(x, y);
+      // console.log(`Begin path at (${x}, ${y})`);
     };
+
     const drawLine = (x, y) => {
       ctx.lineTo(x, y);
       ctx.stroke();
+      // console.log(`Draw line to (${x}, ${y})`);
     };
+
     const handleMouseDown = (e) => {
+      console.log("mouse down");
       shouldDraw.current = true;
-      // ctx.beginPath();
-      // ctx.moveTo(e.clientX, e.clientY);
+
       beginPath(
-        e.clientX || e.touches[0].clientX,
-        e.clientY || e.touches[0].clientY
+        e.clientX,
+        e.clientY
+        // e.clientX || e.touches[0].clientX,
+        // e.clientY || e.touches[0].clientY
       );
-      // socket.emit("beginPath", {
-      //   x: e.clientX || e.touches[0].clientX,
-      //   y: e.clientY || e.touches[0].clientY,
-      // });
+      socket.emit("beginPath", {
+        x: e.clientX,
+        y: e.clientY,
+        // x: e.clientX || e.touches[0].clientX,
+        // y: e.clientY || e.touches[0].clientY,
+      });
     };
 
     const handleMouseMove = (e) => {
       if (!shouldDraw.current) return;
-      // ctx.lineTo(e.clientX, e.clientY);
-      // ctx.stroke();
       drawLine(
-        e.clientX || e.touches[0].clientX,
-        e.clientY || e.touches[0].clientY
+        e.clientX,
+        e.clientY
+        // e.clientX || e.touches[0].clientX,
+        // e.clientY || e.touches[0].clientY
       );
-      // socket.emit("drawLine", {
-      //   x: e.clientX || e.touches[0].clientX,
-      //   y: e.clientY || e.touches[0].clientY,
-      // });
+      socket.emit("drawLine", {
+        x: e.clientX,
+        y: e.clientY,
+        // x: e.clientX || e.touches[0].clientX,
+        // y: e.clientY || e.touches[0].clientY,
+      });
     };
 
     const handleMouseUp = (e) => {
@@ -128,11 +143,13 @@ const Board = () => {
       historyPointer.current = drawHistory.current.length - 1;
     };
 
-    // const handleBeginPath = (path) => {
-    //   beginPath(path.x, path.y);
-    // };
-    // const handleDrawLine = (path) => {
-    //   drawLine(path.x, path.y);
+    const handleBeginPath = (path) => {
+      beginPath(path.x, path.y);
+    };
+
+    const handleDrawLine = (path) => {
+      drawLine(path.x, path.y);
+    };
 
     canvas.addEventListener("mousedown", handleMouseDown);
     canvas.addEventListener("mousemove", handleMouseMove);
@@ -141,8 +158,8 @@ const Board = () => {
     // canvas.addEventListener("touchstart", handleMouseDown);
     // canvas.addEventListener("touchmove", handleMouseMove);
     // canvas.addEventListener("touchend", handleMouseUp);
-    // socket.on("beginPath", handleBeginPath);
-    // socket.on("drawLine", handleDrawLine);
+    socket.on("beginPath", handleBeginPath);
+    socket.on("drawLine", handleDrawLine);
     return () => {
       canvas.removeEventListener("mousedown", handleMouseDown);
       canvas.removeEventListener("mousemove", handleMouseMove);
@@ -152,8 +169,8 @@ const Board = () => {
       // canvas.removeEventListener("touchmove", handleMouseMove);
       // canvas.removeEventListener("touchend", handleMouseUp);
 
-      // socket.off("beginPath", handleBeginPath);
-      // socket.off("drawLine", handleDrawLine);
+      socket.off("beginPath", handleBeginPath);
+      socket.off("drawLine", handleDrawLine);
     };
   }, []);
   return (
